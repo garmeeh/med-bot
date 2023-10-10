@@ -1,6 +1,6 @@
 'use client'
 
-import { useChat, type Message } from 'ai/react'
+import { useChat, type Message, useCompletion } from 'ai/react'
 
 import { cn } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
@@ -16,105 +16,207 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
-import { useState } from 'react'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { usePathname, useRouter } from 'next/navigation'
+import { BOT_STEPS } from '@/lib/types'
+import { DisclaimerText } from './disclaimer-text'
+import { Button } from './ui/button'
+import Image from 'next/image'
+import { useAuth } from '@clerk/nextjs'
 
-const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
+const BOT_STEP_ORDER: BOT_STEPS[] = [
+  'INTAKE',
+  'PREPARE_NOTES',
+  'DIAGNOSIS',
+  'CLINICAL',
+  'REFERRAL'
+]
+
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: Message[]
   id?: string
+  step?: BOT_STEPS
 }
 
-export function Chat({ id, initialMessages, className }: ChatProps) {
+export function Chat({
+  id,
+  initialMessages,
+  step = 'INTAKE',
+  className
+}: ChatProps) {
+  const { userId } = useAuth()
+  const [currentStep, setCurrentStep] = useState<BOT_STEPS>(step)
+  const [medicalResponses, setMedicalResponses] = useState<Message[]>([])
+  const [loadDialog, setLoadDialog] = useState(false)
+  const [hasSeenDisclaimer, setHasSeenDisclaimer] = useLocalStorage<boolean>(
+    'has-seen-disclaimer',
+    false
+  )
+
   const router = useRouter()
   const path = usePathname()
-  const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
-    'ai-token',
-    null
-  )
-  const [previewTokenDialog, setPreviewTokenDialog] = useState(IS_PREVIEW)
-  const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
-  const { messages, append, reload, stop, isLoading, input, setInput } =
-    useChat({
-      initialMessages,
-      id,
+  const { messages, append, isLoading, input, setInput } = useChat({
+    initialMessages,
+    id,
+    body: {
+      id
+    },
+    onResponse(response) {
+      if (response.status === 401) {
+        toast.error('Please login to continue')
+      }
+      if (response.status === 201) {
+        goToNextStep()
+      }
+    },
+    onError() {
+      if (!userId) {
+        return null
+      }
+      toast.error('An error occurred. Please try again later.')
+    },
+    onFinish() {
+      if (!path.includes('chat')) {
+        router.push(`/chat/${id}`, { shallow: true })
+        router.refresh()
+      }
+    }
+  })
+
+  const { complete, completion } = useCompletion({
+    api: '/api/med-bot',
+    onResponse: res => {
+      // trigger something when the response starts streaming in
+      // e.g. if the user is rate limited, you can show a toast
+      if (res.status === 429) {
+        toast.error('You are being rate limited. Please try again later.')
+      }
+    },
+    onFinish: () => {
+      goToNextStep()
+    }
+  })
+
+  const goToNextStep = () => {
+    const currentIndex = BOT_STEP_ORDER.indexOf(currentStep)
+    if (currentIndex >= 0 && currentIndex < BOT_STEP_ORDER.length - 1) {
+      const nextStep = BOT_STEP_ORDER[currentIndex + 1]
+      setCurrentStep(nextStep)
+    }
+  }
+
+  useEffect(() => {
+    if (currentStep === step || currentStep === 'INTAKE') {
+      return
+    }
+
+    complete('', {
       body: {
+        step: currentStep,
         id,
-        previewToken
-      },
-      onResponse(response) {
-        if (response.status === 401) {
-          toast.error('Please login to continue')
-        }
-      },
-      onFinish() {
-        if (!path.includes('chat')) {
-          router.push(`/chat/${id}`, { shallow: true })
-          router.refresh()
-        }
+        messages: [...messages, ...medicalResponses]
       }
     })
+  }, [currentStep])
+
+  useEffect(() => {
+    if (currentStep === 'INTAKE') {
+      return
+    }
+
+    if (!completion) {
+      return
+    }
+
+    const newMedicalResponse: Message = {
+      id: currentStep,
+      role: 'assistant',
+      content: completion
+    }
+
+    // Search for an existing medical response with the same ID (step)
+    const existingIndex = medicalResponses.findIndex(m => m.id === currentStep)
+
+    if (existingIndex !== -1) {
+      // Update existing medical response
+      setMedicalResponses(prev => {
+        const updated = [...prev]
+        updated[existingIndex] = newMedicalResponse
+        return updated
+      })
+    } else {
+      // Add new medical response
+      setMedicalResponses(prev => [...prev, newMedicalResponse])
+    }
+  }, [completion, currentStep])
+
+  useEffect(() => {
+    setLoadDialog(true)
+  }, [])
+
   return (
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
         {messages.length ? (
-          <>
-            <ChatList messages={messages} />
+          <p>
+            <ChatList messages={[...messages, ...medicalResponses]} />
             <ChatScrollAnchor trackVisibility={isLoading} />
-          </>
+          </p>
         ) : (
-          <EmptyScreen setInput={setInput} />
+          <>
+            <div className="mb-4">
+              <EmptyScreen setInput={setInput} />
+            </div>
+            <Image
+              src="/med-bot.png"
+              alt="Medi Bot"
+              width={293}
+              height={357}
+              className="mx-auto"
+            />
+          </>
         )}
       </div>
       <ChatPanel
         id={id}
         isLoading={isLoading}
-        stop={stop}
         append={append}
-        reload={reload}
         messages={messages}
         input={input}
         setInput={setInput}
+        doneWithIntake={() => {
+          goToNextStep()
+        }}
+        hidden={currentStep !== 'INTAKE'}
       />
 
-      <Dialog open={previewTokenDialog} onOpenChange={setPreviewTokenDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Enter your OpenAI Key</DialogTitle>
-            <DialogDescription>
-              If you have not obtained your OpenAI API key, you can do so by{' '}
-              <a
-                href="https://platform.openai.com/signup/"
-                className="underline"
+      {loadDialog ? (
+        <Dialog
+          open={!hasSeenDisclaimer}
+          onOpenChange={() => {
+            setHasSeenDisclaimer(true)
+          }}
+        >
+          <DialogContent className="max-h-screen overflow-auto">
+            <DialogHeader>
+              <DialogTitle>Medical Device Disclaimer</DialogTitle>
+              <DialogDescription>
+                <DisclaimerText />
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="items-center">
+              <Button
+                onClick={() => {
+                  setHasSeenDisclaimer(true)
+                }}
               >
-                signing up
-              </a>{' '}
-              on the OpenAI website. This is only necessary for preview
-              environments so that the open source community can test the app.
-              The token will be saved to your browser&apos;s local storage under
-              the name <code className="font-mono">ai-token</code>.
-            </DialogDescription>
-          </DialogHeader>
-          <Input
-            value={previewTokenInput}
-            placeholder="OpenAI API key"
-            onChange={e => setPreviewTokenInput(e.target.value)}
-          />
-          <DialogFooter className="items-center">
-            <Button
-              onClick={() => {
-                setPreviewToken(previewTokenInput)
-                setPreviewTokenDialog(false)
-              }}
-            >
-              Save Token
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                Accept
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </>
   )
 }

@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { IconSpinner } from '@/components/ui/icons'
+import { Trash } from '@phosphor-icons/react'
 
 interface ClearHistoryProps {
   clearChats: () => ServerActionResult<void>
@@ -33,7 +34,8 @@ export function ClearHistory({ clearChats }: ClearHistoryProps) {
       <AlertDialogTrigger asChild>
         <Button variant="ghost" disabled={isPending}>
           {isPending && <IconSpinner className="mr-2" />}
-          Clear history
+          {!isPending && <Trash className="mr-2" />}
+          Delete All Data
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

@@ -4,6 +4,7 @@ import { Redis } from '@upstash/redis'
 import { auth } from '@clerk/nextjs'
 
 import { nanoid } from '@/lib/utils'
+import { System01Intake } from '@/prompts/system'
 
 export const runtime = 'edge'
 
@@ -20,7 +21,7 @@ const openai = new OpenAIApi(configuration)
 
 export async function POST(req: Request) {
   const json = await req.json()
-  const { messages, previewToken } = json
+  const { messages } = json
   const { userId } = auth()
 
   if (!userId) {
@@ -29,48 +30,65 @@ export async function POST(req: Request) {
     })
   }
 
-  if (previewToken) {
-    configuration.apiKey = previewToken
+  const save = async (completion?: string) => {
+    const title = json.messages[0].content.substring(0, 100)
+    const id = json.id ?? nanoid()
+    const createdAt = Date.now()
+    const path = `/chat/${id}`
+    const payload = {
+      id,
+      title,
+      userId,
+      createdAt,
+      path,
+      messages: [
+        ...messages,
+        ...(completion
+          ? [
+              {
+                content: completion,
+                role: 'assistant'
+              }
+            ]
+          : [])
+      ]
+    }
+    await redis.hmset(`chat:${id}`, payload)
+    await redis.zadd(`user:chat:${userId}`, {
+      score: createdAt,
+      member: `chat:${id}`
+    })
+  }
+
+  if (messages && messages.length === 13) {
+    save()
+    return new Response('', {
+      status: 201
+    })
   }
 
   const res = await openai.createChatCompletion({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4-0613',
     messages: [
       {
-        content: 'You are a super helpful AI assistant!',
+        content: System01Intake,
         role: 'system'
       },
       ...messages
     ],
-    temperature: 0.7,
+    temperature: 0,
     stream: true
   })
 
+  if (!res.ok) {
+    return new Response('Error', {
+      status: 500
+    })
+  }
+
   const stream = OpenAIStream(res, {
     async onCompletion(completion) {
-      const title = json.messages[0].content.substring(0, 100)
-      const id = json.id ?? nanoid()
-      const createdAt = Date.now()
-      const path = `/chat/${id}`
-      const payload = {
-        id,
-        title,
-        userId,
-        createdAt,
-        path,
-        messages: [
-          ...messages,
-          {
-            content: completion,
-            role: 'assistant'
-          }
-        ]
-      }
-      await redis.hmset(`chat:${id}`, payload)
-      await redis.zadd(`user:chat:${userId}`, {
-        score: createdAt,
-        member: `chat:${id}`
-      })
+      save(completion)
     }
   })
 

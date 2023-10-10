@@ -1,54 +1,82 @@
+import { useState } from 'react'
 import { UseChatHelpers } from 'ai/react'
 
-import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 import { ExternalLink } from '@/components/external-link'
-import { IconArrowRight } from '@/components/ui/icons'
-
-const exampleMessages = [
-  {
-    heading: 'Explain technical concepts',
-    message: `What is a "serverless function"?`
-  },
-  {
-    heading: 'Summarize an article',
-    message: 'Summarize the following article for a 2nd grader: \n'
-  },
-  {
-    heading: 'Draft an email',
-    message: `Draft an email to my boss about the following: \n`
-  }
-]
+import { DisclaimerText } from './disclaimer-text'
+import { Button } from './ui/button'
 
 export function EmptyScreen({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   return (
-    <div className="mx-auto max-w-2xl px-4">
-      <div className="rounded-lg border bg-background p-8">
-        <h1 className="mb-2 text-lg font-semibold">
-          Welcome to Next.js AI Chatbot!
-        </h1>
-        <p className="mb-2 leading-normal text-muted-foreground">
-          This is an open source AI chatbot app template built with Open source{' '}
-          <ExternalLink href="https://nextjs.org">Next.js</ExternalLink>,{' '}
-          <ExternalLink href="https://upstash.com/">Upstash</ExternalLink> and{' '}
-          <ExternalLink href="https://clerk.com/">Clerk</ExternalLink>.
-        </p>
-        <p className="leading-normal text-muted-foreground">
-          You can start a conversation here or try the following examples:
-        </p>
-        <div className="mt-4 flex flex-col items-start space-y-2">
-          {exampleMessages.map((message, index) => (
-            <Button
-              key={index}
-              variant="link"
-              className="h-auto p-0 text-base"
-              onClick={() => setInput(message.message)}
+    <>
+      <div className="mx-auto max-w-2xl px-4">
+        <div className="rounded-lg border bg-background p-8">
+          <h1 className="mb-2 text-lg font-semibold">Welcome to Medi Bot!</h1>
+          <p className="mb-2 leading-normal text-muted-foreground"></p>
+          <p className="mb-2 leading-normal text-muted-foreground">
+            This app demos the current capabilities of the GPT-4 model in a
+            medical setting. Completely open source and available on{' '}
+            <ExternalLink href="https://github.com/garmeeh/med-bot">
+              Github
+            </ExternalLink>{' '}
+            created by{' '}
+            <ExternalLink href="https://twitter.com/garmeeh">Gary</ExternalLink>
+            . It is based on some of the amazing work done by{' '}
+            <ExternalLink href="https://www.linkedin.com/in/dave-shap-automator/">
+              David Shapiro
+            </ExternalLink>
+            .
+          </p>
+          <p className="mb-4 leading-normal text-muted-foreground">
+            It is intended to be a tool for medical professionals to help them
+            during intake and during the diagnosis process.
+          </p>
+          <p className="mb-4 leading-normal text-muted-foreground">
+            To get started enter a medical problem you are currently facing. For
+            example: "I have a pain in my head that I keep waking up with each
+            day. "
+          </p>
+
+          <p className="text-xs leading-normal text-muted-foreground">
+            This is just for demo purposes -{' '}
+            <button
+              onClick={() => {
+                setDisclaimerOpen(true)
+              }}
+              className="underline"
             >
-              <IconArrowRight className="mr-2 text-muted-foreground" />
-              {message.heading}
-            </Button>
-          ))}
+              view full disclaimer
+            </button>
+          </p>
         </div>
       </div>
-    </div>
+      <Dialog open={disclaimerOpen} onOpenChange={setDisclaimerOpen}>
+        <DialogContent className="max-h-screen overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Medical Device Disclaimer</DialogTitle>
+            <DialogDescription>
+              <DisclaimerText />
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="items-center">
+            <Button
+              onClick={() => {
+                setDisclaimerOpen(false)
+              }}
+            >
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

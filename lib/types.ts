@@ -8,6 +8,7 @@ export interface Chat extends Record<string, any> {
   path: string
   messages: Message[]
   sharePath?: string
+  step: BOT_STEPS
 }
 
 export type ServerActionResult<Result> = Promise<
@@ -16,3 +17,10 @@ export type ServerActionResult<Result> = Promise<
       error: string
     }
 >
+
+export type BOT_STEPS =
+  | 'INTAKE'
+  | 'PREPARE_NOTES'
+  | 'DIAGNOSIS'
+  | 'CLINICAL'
+  | 'REFERRAL'
