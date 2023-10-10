@@ -1,12 +1,18 @@
+import { ExternalLink } from './external-link'
+
 export function DisclaimerText() {
   return (
     <>
       <p className="mb-2 leading-5">
-        This software, available both under this GitHub repository and as an
-        app, and licensed under the MIT license, is an experimental project and
-        is NOT a medical device. Do not use real data when interacting with this
-        software. It is not intended to be used as a medical device or as a
-        substitute for professional medical advice, diagnosis, or treatment.
+        This software, available both in this{' '}
+        <ExternalLink href="https://github.com/garmeeh/med-bot">
+          GitHub repository
+        </ExternalLink>{' '}
+        and as an app (this one), and licensed under the MIT license, is an
+        experimental project and is NOT a medical device. Do not use real data
+        when interacting with this software. It is not intended to be used as a
+        medical device or as a substitute for professional medical advice,
+        diagnosis, or treatment.
       </p>
       <p className="mb-2 leading-5">
         The software is designed to test artificial intelligence's ability to
