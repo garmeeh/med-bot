@@ -198,7 +198,7 @@ export function Chat({
             setHasSeenDisclaimer(true)
           }}
         >
-          <DialogContent className="max-h-screen overflow-auto">
+          <DialogContent className="max-h-screen overflow-auto pb-32 md:pb-0">
             <DialogHeader>
               <DialogTitle>Medical Device Disclaimer</DialogTitle>
               <DialogDescription>
