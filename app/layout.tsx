@@ -32,12 +32,14 @@ export const metadata: Metadata = {
     description:
       'An AI-powered medical chatbot built with Next.js and Vercel powered by GPT-4',
     creator: '@garmeeh',
-    images: {
-      url: 'https://www.medibot.chat/opengraph-image.png',
-      alt: 'Medical Bot',
-      width: 1200,
-      height: 675
-    }
+    images: [
+      {
+        url: 'https://www.medibot.chat/opengraph-image.png',
+        alt: 'Medical Bot',
+        width: 1200,
+        height: 675
+      }
+    ]
   }
 }
 
