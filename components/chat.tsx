@@ -159,10 +159,10 @@ export function Chat({
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
         {messages.length ? (
-          <p>
+          <div>
             <ChatList messages={[...messages, ...medicalResponses]} />
             <ChatScrollAnchor trackVisibility={isLoading} />
-          </p>
+          </div>
         ) : (
           <>
             <div className="mb-4">
