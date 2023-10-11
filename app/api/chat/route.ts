@@ -55,22 +55,18 @@ export async function POST(req: Request) {
       ]
     }
 
-    console.log('save payload to redis', payload)
+    console.log('start save to redis', payload)
     try {
-      const hmsetResult = await redis.hmset(`chat:${id}`, payload)
-      console.log('hmset result:', hmsetResult)
+      await Promise.all([
+        redis.hmset(`chat:${id}`, payload),
+        redis.zadd(`user:chat:${userId}`, {
+          score: createdAt,
+          member: `chat:${id}`
+        })
+      ])
+      console.log('save success')
     } catch (error) {
-      console.error('Error with hmset:', error)
-    }
-
-    try {
-      const zaddResult = await redis.zadd(`user:chat:${userId}`, {
-        score: createdAt,
-        member: `chat:${id}`
-      })
-      console.log('zadd result:', zaddResult)
-    } catch (error) {
-      console.error('Error with zadd:', error)
+      console.error('save error', error)
     }
   }
 
