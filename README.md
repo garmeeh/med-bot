@@ -1,4 +1,4 @@
-<img alt="Demo medical bot app powered by GPT-4" src="https://www.medibot.chat /opengraph-image.png">
+<img alt="Demo medical bot app powered by GPT-4" src="https://www.medibot.chat/opengraph-image.png">
 <h1 align="center">Demo AI Medical Chatbot</h1>
 
 <p align="center">
