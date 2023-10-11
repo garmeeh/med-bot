@@ -53,11 +53,18 @@ export async function POST(req: Request) {
           : [])
       ]
     }
-    await redis.hmset(`chat:${id}`, payload)
-    await redis.zadd(`user:chat:${userId}`, {
-      score: createdAt,
-      member: `chat:${id}`
-    })
+
+    try {
+      await Promise.all([
+        redis.hmset(`chat:${id}`, payload),
+        redis.zadd(`user:chat:${userId}`, {
+          score: createdAt,
+          member: `chat:${id}`
+        })
+      ])
+    } catch (error) {
+      console.error('error saving chat to redis', error)
+    }
   }
 
   if (messages && messages.length === 13) {

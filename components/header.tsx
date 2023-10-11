@@ -5,12 +5,12 @@ import { clearChats } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 import { Sidebar } from '@/components/sidebar'
 import { SidebarList } from '@/components/sidebar-list'
-import { IconNextChat, IconSeparator } from '@/components/ui/icons'
 import { SidebarFooter } from '@/components/sidebar-footer'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ClearHistory } from '@/components/clear-history'
 import { UserButton, currentUser } from '@clerk/nextjs'
 import type { User } from '@clerk/nextjs/api'
+import Image from 'next/image'
 
 export async function Header() {
   const user: User | null = await currentUser()
@@ -31,8 +31,7 @@ export async function Header() {
           </Sidebar>
         ) : (
           <Link href="/" target="_blank" rel="nofollow">
-            <IconNextChat className="mr-2 h-6 w-6 dark:hidden" inverted />
-            <IconNextChat className="mr-2 hidden h-6 w-6 dark:block" />
+            <Image src="/med-bot.png" alt="Medi Bot" width={40} height={48} />
           </Link>
         )}
       </div>
