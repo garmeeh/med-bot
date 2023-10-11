@@ -56,11 +56,22 @@ export async function POST(req: Request) {
     }
 
     console.log('save payload to redis', payload)
-    await redis.hmset(`chat:${id}`, payload)
-    await redis.zadd(`user:chat:${userId}`, {
-      score: createdAt,
-      member: `chat:${id}`
-    })
+    try {
+      const hmsetResult = await redis.hmset(`chat:${id}`, payload)
+      console.log('hmset result:', hmsetResult)
+    } catch (error) {
+      console.error('Error with hmset:', error)
+    }
+
+    try {
+      const zaddResult = await redis.zadd(`user:chat:${userId}`, {
+        score: createdAt,
+        member: `chat:${id}`
+      })
+      console.log('zadd result:', zaddResult)
+    } catch (error) {
+      console.error('Error with zadd:', error)
+    }
   }
 
   if (messages && messages.length === 13) {
