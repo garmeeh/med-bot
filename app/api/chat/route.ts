@@ -31,7 +31,6 @@ export async function POST(req: Request) {
   }
 
   const save = async (completion?: string) => {
-    console.log('start save')
     const title = json.messages[0].content.substring(0, 100)
     const id = json.id ?? nanoid()
     const createdAt = Date.now()
@@ -55,7 +54,6 @@ export async function POST(req: Request) {
       ]
     }
 
-    console.log('start save to redis', payload)
     try {
       await Promise.all([
         redis.hmset(`chat:${id}`, payload),
@@ -64,9 +62,8 @@ export async function POST(req: Request) {
           member: `chat:${id}`
         })
       ])
-      console.log('save success')
     } catch (error) {
-      console.error('save error', error)
+      console.error('error saving chat to redis', error)
     }
   }
 
@@ -98,7 +95,6 @@ export async function POST(req: Request) {
 
   const stream = OpenAIStream(res, {
     async onCompletion(completion) {
-      console.log('onCompletion')
       save(completion)
     }
   })
