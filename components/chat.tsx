@@ -78,8 +78,8 @@ export function Chat({
     },
     onFinish() {
       if (!path.includes('chat')) {
-        // router.push(`/chat/${id}`, { shallow: true })
-        // router.refresh()
+        router.push(`/chat/${id}`, { shallow: true })
+        router.refresh()
       }
     }
   })
