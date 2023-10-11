@@ -31,6 +31,7 @@ export async function POST(req: Request) {
   }
 
   const save = async (completion?: string) => {
+    console.log('start save')
     const title = json.messages[0].content.substring(0, 100)
     const id = json.id ?? nanoid()
     const createdAt = Date.now()
@@ -53,6 +54,8 @@ export async function POST(req: Request) {
           : [])
       ]
     }
+
+    console.log('save payload to redis', payload)
     await redis.hmset(`chat:${id}`, payload)
     await redis.zadd(`user:chat:${userId}`, {
       score: createdAt,
@@ -88,6 +91,7 @@ export async function POST(req: Request) {
 
   const stream = OpenAIStream(res, {
     async onCompletion(completion) {
+      console.log('onCompletion')
       save(completion)
     }
   })
