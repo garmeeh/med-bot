@@ -11,6 +11,7 @@ import { Providers } from '@/components/providers'
 import { Header } from '@/components/header'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.medibot.chat'),
   title: {
     default: 'Medi Bot',
     template: `%s - Medi Bot`
@@ -25,21 +26,6 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',
     apple: '/apple-touch-icon.png'
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Medi Bot',
-    description:
-      'An AI-powered medical chatbot built with Next.js and Vercel powered by GPT-4',
-    creator: '@garmeeh',
-    images: [
-      {
-        url: 'https://www.medibot.chat/opengraph-image.png',
-        alt: 'Medical Bot',
-        width: 1200,
-        height: 675
-      }
-    ]
   }
 }
 
