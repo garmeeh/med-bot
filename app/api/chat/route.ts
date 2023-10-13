@@ -53,7 +53,7 @@ export async function POST(req: Request) {
           : [])
       ]
     }
-
+console.log('before ping');
     const pong = await redis.ping()
     console.log('pong', pong)
     try {
