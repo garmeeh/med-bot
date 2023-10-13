@@ -64,6 +64,7 @@ export async function POST(req: Request) {
           member: `chat:${id}`
         })
       ])
+      console.log('all resolved')
     } catch (error) {
       console.error('error saving chat to redis', error)
     }
