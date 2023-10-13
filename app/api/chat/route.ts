@@ -54,6 +54,8 @@ export async function POST(req: Request) {
       ]
     }
 
+    const pong = await redis.ping()
+    console.log('pong', pong)
     try {
       await Promise.all([
         redis.hmset(`chat:${id}`, payload),
