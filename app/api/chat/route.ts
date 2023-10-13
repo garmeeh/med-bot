@@ -31,6 +31,7 @@ export async function POST(req: Request) {
   }
 
   const save = async (completion?: string) => {
+    console.log('saving chat')
     const title = json.messages[0].content.substring(0, 100)
     const id = json.id ?? nanoid()
     const createdAt = Date.now()
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
           : [])
       ]
     }
-console.log('before ping');
+    console.log('before ping')
     const pong = await redis.ping()
     console.log('pong', pong)
     try {
@@ -98,6 +99,7 @@ console.log('before ping');
 
   const stream = OpenAIStream(res, {
     async onCompletion(completion) {
+      console.log('call save')
       save(completion)
     }
   })
