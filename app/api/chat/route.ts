@@ -56,6 +56,9 @@ export async function POST(req: Request) {
     }
 
     console.log('save payload to redis', payload)
+    const pong = await redis.ping()
+    console.log('pinged redis', pong)
+
     try {
       const hmsetResult = await redis.hmset(`chat:${id}`, payload)
       console.log('hmset result:', hmsetResult)
