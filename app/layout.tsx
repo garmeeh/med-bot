@@ -16,6 +16,14 @@ export const metadata: Metadata = {
     default: 'Medi Bot',
     template: `%s - Medi Bot`
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Medi Bot',
+    description:
+      'An AI-powered medical chatbot built with Next.js and Vercel powered by GPT-4',
+    images: ['https://www.medibot.chat/twitter-image.png'],
+    creator: '@garmeeh'
+  },
   description:
     'An AI-powered medical chatbot built with Next.js and Vercel powered by GPT-4',
   themeColor: [
