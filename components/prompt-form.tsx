@@ -51,7 +51,7 @@ export function PromptForm({
       ref={formRef}
     >
       <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">
-        {(!isSignedIn || user) && (
+        {(!isSignedIn || !user) && (
           <div className=" absolute inset-0 z-20 flex h-full w-full items-center justify-center bg-white">
             <div className="flex flex-col items-center space-y-2">
               <p className="text-center text-sm">
