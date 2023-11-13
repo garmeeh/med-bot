@@ -54,9 +54,9 @@ export function PromptForm({
         {(!isSignedIn || !user) && (
           <div className=" absolute inset-0 z-20 flex h-full w-full items-center justify-center bg-white">
             <div className="flex flex-col items-center space-y-2">
-              <p className="text-center text-sm">
+              <p className="text-center text-sm text-black">
                 You need to be signed in to chat with me.{' '}
-                <Link href="/sign-in?callbackUrl=/">Login</Link>
+                <Link href="/sign-in?callbackUrl=/" className="underline">Login</Link>
               </p>
             </div>
           </div>
