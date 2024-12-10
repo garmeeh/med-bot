@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   }
 
   const res = await openai.createChatCompletion({
-    model: 'gpt-4-0613',
+    model: 'gpt-4o',
     messages: [
       {
         content: System01Intake,

@@ -108,10 +108,8 @@ export async function POST(req: Request) {
       prompt = ''
   }
 
-  // gpt-4-0613
-  // gpt-3.5-turbo
   const res = await openai.createChatCompletion({
-    model: 'gpt-4-0613',
+    model: 'gpt-4o',
     messages: [
       {
         content: systemPrompt,
